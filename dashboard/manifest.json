@@ -1,0 +1,40 @@
+{
+  "name": "همراه تحصیلی — داشبورد انتخاب واحد",
+  "short_name": "همراه تحصیلی",
+  "description": "داشبورد حرفه‌ای انتخاب واحد و برنامه‌ریزی مسیر فارغ‌التحصیلی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#06152b",
+  "theme_color": "#071a33",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "فهرست درس‌ها",
+      "short_name": "درس‌ها",
+      "url": "./index.html#courses"
+    },
+    {
+      "name": "شبیه‌ساز معدل",
+      "short_name": "معدل",
+      "url": "./index.html#gpa"
+    }
+  ]
+}

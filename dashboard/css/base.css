@@ -1,0 +1,55 @@
+/* ============ متغیرها و تم‌ها ============ */
+html{
+  --bg:#06152b;--bg2:#0a1e3a;--panel:#0b2345;--panel2:#102b4d;--panel3:#16345a;
+  --line:#1b416b;--line2:#255489;--text:#edf5ff;--muted:#a9c0dd;
+  --accent:#268fe5;--accent2:#54c8ff;--success:#10bb80;--warning:#f6c747;--danger:#f45162;
+  --purple:#9564f5;--teal:#22d3c5;--pink:#ec4899;
+  --shadow-sm:0 2px 8px #0003;--shadow:0 10px 30px #0003;--shadow-lg:0 20px 60px #0005;
+  --radius:16px;--font:Estedad,Tahoma,"Segoe UI",system-ui,sans-serif;
+}
+
+/* پالت‌ها */
+html[data-palette="forest"]   {--accent:#1bb98a;--accent2:#72e0bc}
+html[data-palette="royal"]    {--accent:#8b5cf6;--accent2:#c4a6ff}
+html[data-palette="sunset"]   {--accent:#d99019;--accent2:#ffcf70}
+html[data-palette="rose"]     {--accent:#e34d86;--accent2:#ffa5c5}
+html[data-palette="turquoise"]{--accent:#0faaa8;--accent2:#75eee0}
+html[data-palette="slate"]    {--accent:#7d9bbd;--accent2:#c2d5e8}
+/* ocean = پیش‌فرض؛ نیازی به rule ندارد */
+
+/* تم روشن */
+html[data-theme="light"]{
+  --bg:#eef3f9;--bg2:#e3ebf5;--panel:#ffffff;--panel2:#f4f8fd;--panel3:#e3ebf5;
+  --line:#ccd9e9;--line2:#b3c5da;--text:#172c45;--muted:#5f738c;
+  --shadow-sm:0 2px 8px #0d1e3414;--shadow:0 10px 30px #0d1e3418;--shadow-lg:0 20px 60px #0d1e3422;
+}
+
+/* تم خودکار (auto) — روشن */
+@media(prefers-color-scheme:light){
+  html[data-theme="auto"]{
+    --bg:#eef3f9;--bg2:#e3ebf5;--panel:#ffffff;--panel2:#f4f8fd;--panel3:#e3ebf5;
+    --line:#ccd9e9;--line2:#b3c5da;--text:#172c45;--muted:#5f738c;
+    --shadow-sm:0 2px 8px #0d1e3414;--shadow:0 10px 30px #0d1e3418;--shadow-lg:0 20px 60px #0d1e3422;
+  }
+}
+
+/* ============ Reset و پایه ============ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{
+  margin:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,var(--bg2) 0%,var(--bg) 65%);
+  color:var(--text);
+  font:14px/1.7 var(--font);
+  min-height:100vh;
+  transition:background .3s,color .3s;
+  overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;touch-action:manipulation;background:none;border:0;color:inherit}
+
+.muted{color:var(--muted);font-size:12px}
+.detail{color:var(--muted);font-size:11px;line-height:1.8}
+.bullet{color:var(--accent2);font-size:16px;line-height:1.5}
+.badge-priority{color:var(--warning);font-weight:600}

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>داشبورد انتخاب واحد | همراه تحصیلی</title>
+<meta name="theme-color" content="#071a33">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="همراه تحصیلی">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Estedad:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo" aria-hidden="true">▦</div><div><h1>همراه تحصیلی</h1><div class="subtitle">داشبورد حرفه‌ای انتخاب واحد · برنامه‌ریزی مسیر فارغ‌التحصیلی</div></div></div>
+  <div class="top-actions">
+    <button class="btn ghost" id="cmdkBtn" type="button">🔍 جست‌وجو <span style="font-size:10px;opacity:.6;background:var(--panel2);padding:2px 6px;border-radius:5px;font-family:monospace">Ctrl+K</span></button>
+    <select class="select" id="themeSelect" aria-label="حالت نمایش"><option value="dark">حالت تاریک</option><option value="light">حالت روشن</option><option value="auto">مطابق سیستم</option></select>
+    <select class="select" id="paletteSelect" aria-label="پالت رنگی"><option value="ocean">اقیانوسی</option><option value="forest">جنگلی</option><option value="royal">بنفش سلطنتی</option><option value="sunset">غروب طلایی</option><option value="rose">رز و یاقوتی</option><option value="turquoise">فیروزه‌ای</option><option value="slate">آبی خاکستری</option></select>
+    <button class="btn" id="exportBtn" type="button">↓ پشتیبان</button>
+    <button class="btn" id="csvBtn" type="button">▤ CSV</button>
+    <button class="btn" id="shareBtn" type="button">🔗 اشتراک</button>
+    <button class="btn" id="importBtn" type="button">↑ بازیابی</button><input type="file" id="importFile" accept=".json" hidden>
+    <button class="btn primary" id="addCourseBtn" type="button">＋ افزودن درس</button>
+  </div>
+</header>
+
+<div class="notice" id="dataNotice"><div class="icon">⚠️</div><div style="padding-left:24px"><b>آمار اصلی از فهرست جزئی درس‌ها محاسبه می‌شود</b><p>خلاصه عددی شیت Dashboard با فهرست درس‌ها تطابق کامل ندارد؛ برای همین اعداد اصلی اکسل در بخش «بررسی داده‌های منبع» حفظ شده‌اند.</p></div><button class="close-notice" type="button" aria-label="بستن" onclick="this.parentElement.style.display='none'">✕</button></div>
+
+<section class="kpis" aria-label="شاخص‌های پیشرفت">
+  <div class="kpi" style="--tone:var(--accent)"><div class="kpi-label">📚 کل درس‌های ثبت‌شده</div><div class="kpi-number" id="kTotal">۰</div><small id="kTotalUnits">۰ واحد در کل</small><div class="kpi-progress"><span style="width:100%"></span></div></div>
+  <div class="kpi" style="--tone:var(--success)"><div class="kpi-label">✓ پاس‌شده</div><div class="kpi-number" id="kPassed">۰</div><small id="kPassedUnits">۰ واحد گذرانده</small><div class="kpi-progress"><span id="kPassedBar" style="width:0%"></span></div></div>
+  <div class="kpi" style="--tone:var(--warning)"><div class="kpi-label">◷ باقی‌مانده</div><div class="kpi-number" id="kRemaining">۰</div><small id="kRemainingUnits">۰ واحد باقی</small><div class="kpi-progress"><span id="kRemainingBar" style="width:0%"></span></div></div>
+  <div class="kpi" style="--tone:var(--purple)"><div class="kpi-label">٪ پیشرفت واحدی</div><div class="kpi-number" id="kProgress">۰٪</div><small>بر اساس واحدهای ثبت‌شده</small><div class="kpi-progress"><span id="kProgressBar" style="width:0%"></span></div></div>
+  <div class="kpi" style="--tone:var(--danger)"><div class="kpi-label">◆ تخصصی باقی‌مانده</div><div class="kpi-number" id="kSpecialty">۰</div><small id="kSpecialtyUnits">۰ واحد تخصصی</small><div class="kpi-progress"><span id="kSpecialtyBar" style="width:0%"></span></div></div>
+  <div class="kpi" style="--tone:var(--teal)"><div class="kpi-label">◫ ترم انتخابی فعلی</div><div class="kpi-number">۷</div><small>طبق عنوان فایل اکسل</small><div class="kpi-progress"><span style="width:70%"></span></div></div>
+</section>
+
+<nav class="tabs" aria-label="بخش‌های داشبورد">
+  <button class="tab active" data-view="dashboard">▦ نمای کلی</button>
+  <button class="tab" data-view="planner">🧠 برنامه‌ریز هوشمند</button>
+  <button class="tab" data-view="gpa">🧮 شبیه‌ساز معدل</button>
+  <button class="tab" data-view="graph">🌳 نقشه پیش‌نیازها</button>
+  <button class="tab" data-view="courses">▤ فهرست درس‌ها</button>
+  <button class="tab" data-view="planning">◫ برنامه ترم‌ها</button>
+  <button class="tab" data-view="terms">▥ بار ترم‌ها</button>
+  <button class="tab" data-view="stats">📊 آمار تحلیلی</button>
+  <button class="tab" data-view="achievements">🏆 دستاوردها</button>
+  <button class="tab" data-view="source">ⓘ داده منبع</button>
+</nav>
+
+<main>
+
+  <!-- ==================== نمای کلی ==================== -->
+  <section class="view active" id="view-dashboard">
+    <div class="charts">
+      <section class="panel chart-panel"><div class="panel-head"><h2>وضعیت درس‌ها</h2><span class="mini-badge">فهرست جزئی</span></div><canvas id="statusChart"></canvas><div class="legend" id="statusLegend"></div></section>
+      <section class="panel chart-panel"><div class="panel-head"><h2>درس‌های باقی‌مانده بر اساس نوع</h2></div><canvas id="typeChart"></canvas><div class="legend" id="typeLegend"></div></section>
+      <section class="panel chart-panel"><div class="panel-head"><h2>پیشرفت واحدی</h2></div><canvas id="creditChart"></canvas><div class="legend" id="creditLegend"></div></section>
+    </div>
+
+    <section class="panel" style="margin-bottom:15px"><div class="panel-head"><h2>پیشرفت به تفکیک نوع درس</h2><span class="mini-badge" id="catCount">۰ نوع</span></div><div class="cat-grid" id="catGrid"></div></section>
+
+    <div class="layout">
+      <div class="main">
+        <section class="panel"><div class="panel-head"><h2>درس‌های باقی‌مانده برای برنامه‌ریزی</h2><button class="btn sm" id="goCourses" type="button">مشاهده همه درس‌ها ←</button></div><div class="table-wrap"><table><thead><tr><th>نام درس</th><th>نوع</th><th>واحد</th><th>ترم پیشنهادی</th><th>پیش‌نیاز</th><th>وضعیت</th></tr></thead><tbody id="priorityBody"></tbody></table></div><div id="priorityEmpty" class="empty priority" hidden>🎉 همه درس‌ها پاس شده‌اند.</div></section>
+        <section class="panel"><div class="panel-head"><h2>نکات ثبت‌شده در فایل اصلی</h2><span class="mini-badge">متن منبع</span></div><ul class="note-list" id="sourceNotes"></ul></section>
+      </div>
+      <aside class="side">
+        <section class="panel"><div class="panel-head"><h2>خلاصه برنامه‌ریزی</h2></div><ul class="stats-list"><li><span>درس‌های دارای پیش‌نیاز</span><strong id="withPrereq">۰</strong></li><li><span>بدون ترم انتخابی</span><strong id="unassignedTerm">۰</strong></li><li><span>واحدهای ترم ۸ و ۹</span><strong id="futureUnits">۰</strong></li><li><span>میانگین نمرات (ثبت‌شده)</span><strong id="gpaAvg">—</strong></li></ul><div style="margin-top:16px"><div class="panel-head" style="margin-bottom:8px"><h2 style="font-size:13px">پیشرفت کلی</h2><b id="progressLabel">۰٪</b></div><div class="meter"><span id="progressMeter" style="width:0%"></span></div></div></section>
+        <section class="panel"><div class="panel-head"><h2>دسترسی سریع</h2></div><div class="quick-list" style="display:grid;gap:8px"><button class="btn primary" id="addCourseQuick" type="button">＋ ثبت درس جدید</button><button class="btn" id="filterRemaining" type="button">◷ درس‌های باقی‌مانده</button><button class="btn" id="filterSpecialty" type="button">◆ درس‌های تخصصی</button><button class="btn" id="filterReadyBtn" type="button">✅ آماده برای انتخاب</button><button class="btn" id="printBtn" type="button">⎙ چاپ / PDF</button><button class="btn danger" id="resetData" type="button">↺ بازگردانی اولیه</button></div></section>
+        <section class="panel"><div class="panel-head"><h2>وضعیت ذخیره‌سازی</h2><span style="color:var(--success)">●</span></div><p class="muted" style="margin:0">تغییرات در حافظه محلی مرورگر ذخیره می‌شوند.</p><p class="muted" style="margin:10px 0 0;font-size:11px">میانبر: <b>Ctrl+K</b> جست‌وجو · <b>N</b> درس جدید · <b>/</b> فوکوس جست‌وجو · <b>Esc</b> بستن</p></section>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ==================== برنامه‌ریز هوشمند ==================== -->
+  <section class="view" id="view-planner">
+    <section class="panel">
+      <div class="panel-head"><h2>برنامه‌ریز هوشمند ترم بعد</h2><span class="mini-badge" id="plannerBadge">آماده</span></div>
+      <p class="muted">این بخش درس‌هایی را که پیش‌نیازشان را گذرانده‌ای و در ترم‌های آینده باقی مانده‌اند، اولویت‌بندی می‌کند. می‌توانی سقف واحد را تعیین کنی.</p>
+      <div class="tool-row" style="margin-top:8px">
+        <label class="field" style="display:flex;align-items:center;gap:8px;background:var(--panel2);padding:8px 14px;border-radius:11px;border:1px solid var(--line);flex:0 0 auto">
+          <span style="color:var(--muted);font-size:12px">سقف واحد ترم:</span>
+          <input id="plannerMaxUnits" type="number" min="6" max="24" value="18" style="width:70px;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;text-align:center">
+        </label>
+        <button class="btn primary" id="plannerGenerate" type="button">🧠 تولید پیشنهاد</button>
+        <button class="btn" id="plannerApply" type="button">✔ اعمال به برنامه ترم‌ها</button>
+      </div>
+      <div id="plannerOutput" style="margin-top:14px"></div>
+    </section>
+  </section>
+
+  <!-- ==================== شبیه‌ساز معدل ==================== -->
+  <section class="view" id="view-gpa">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>شبیه‌ساز معدل ترم فرضی</h2>
+        <span class="mini-badge" id="gpaBadge">آماده</span>
+      </div>
+      <p class="muted">نمرات فرضی دروس ترم‌های آینده را وارد کن تا معدل ترم، معدل فعلی و معدل کل پیش‌بینی‌شده را ببینی.</p>
+
+      <div class="gpa-kpis">
+        <div class="gpa-kpi">
+          <div class="gpa-kpi-label">📘 معدل فعلی</div>
+          <div class="gpa-kpi-value" id="gpaCurrent">—</div>
+          <small id="gpaCurrentMeta">—</small>
+        </div>
+        <div class="gpa-kpi">
+          <div class="gpa-kpi-label">🧪 معدل ترم فرضی</div>
+          <div class="gpa-kpi-value" id="gpaTerm">—</div>
+          <small id="gpaTermMeta">—</small>
+        </div>
+        <div class="gpa-kpi" style="--tone:var(--success)">
+          <div class="gpa-kpi-label">🎯 معدل کل پیش‌بینی‌شده</div>
+          <div class="gpa-kpi-value" id="gpaProjected">—</div>
+          <small id="gpaProjectedMeta">—</small>
+        </div>
+      </div>
+
+      <div class="tool-row" style="margin-top:14px">
+        <button class="btn" id="gpaLoadFromPlan" type="button">↧ بارگذاری از برنامه ترم‌ها</button>
+        <button class="btn" id="gpaLoadFromRemaining" type="button">↧ همه دروس باقی‌مانده</button>
+        <button class="btn" id="gpaClear" type="button">✕ پاک‌کردن نمرات فرضی</button>
+        <button class="btn" id="gpaAddRow" type="button">＋ افزودن درس دلخواه</button>
+      </div>
+
+      <div class="table-wrap" style="max-height:520px">
+        <table>
+          <thead>
+            <tr>
+              <th>درس</th>
+              <th>نوع</th>
+              <th>واحد</th>
+              <th>نمره فرضی</th>
+              <th>تأثیر بر معدل</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="gpaBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="gpaEmpty" hidden>هنوز درسی برای شبیه‌سازی انتخاب نکرده‌ای.</div>
+    </section>
+  </section>
+
+  <!-- ==================== نقشه پیش‌نیازها ==================== -->
+  <section class="view" id="view-graph">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>نقشه گرافیکی پیش‌نیازها</h2>
+        <div id="graphStats" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <p class="muted">هر جعبه یک درس است؛ فلش‌ها پیش‌نیازها را نشان می‌دهند (از راست به چپ). روی هر درس نگه دار تا مسیر پیش‌نیازش را ببینی. کلیک کن تا جزئیاتش باز شود.</p>
+
+      <div class="tool-row" style="margin-top:10px">
+        <button class="btn" id="graphZoomOut" type="button" title="کوچک‌نمایی">−</button>
+        <button class="btn" id="graphZoomReset" type="button" title="اندازه اصلی">۱۰۰٪</button>
+        <button class="btn" id="graphZoomIn" type="button" title="بزرگ‌نمایی">＋</button>
+        <button class="btn" id="graphFit" type="button">⤢ جا دادن در صفحه</button>
+        <span style="flex:1"></span>
+        <label style="display:flex;align-items:center;gap:6px;background:var(--panel2);padding:8px 14px;border-radius:11px;border:1px solid var(--line);font-size:12px;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="graphOnlyRemaining"> فقط باقی‌مانده‌ها
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;background:var(--panel2);padding:8px 14px;border-radius:11px;border:1px solid var(--line);font-size:12px;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="graphOnlySpecialty"> فقط تخصصی
+        </label>
+      </div>
+
+      <div class="graph-wrap" id="graphWrap" style="margin-top:12px">
+        <svg class="graph-svg" id="graphSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div class="graph-legend" style="margin-top:12px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted)">
+        <span><i class="dot" style="background:var(--success)"></i> پاس‌شده</span>
+        <span><i class="dot" style="background:var(--warning)"></i> باقی‌مانده</span>
+        <span><i class="dot" style="background:var(--accent2)"></i> درس انتخاب‌شده</span>
+        <span><i class="dot" style="background:var(--purple)"></i> پیش‌نیازهای آن</span>
+        <span><i class="dot" style="background:var(--teal)"></i> دروسی که این درس پیش‌نیازشان است</span>
+      </div>
+    </section>
+  </section>
+
+  <!-- ==================== فهرست درس‌ها ==================== -->
+  <section class="view" id="view-courses">
+    <section class="panel"><div class="panel-head"><h2>فهرست کامل درس‌ها</h2><span class="mini-badge" id="courseCountBadge">۰ درس</span></div>
+      <div class="tool-row">
+        <div class="search-wrap"><span class="search-icon">🔍</span><input id="searchCourse" type="search" placeholder="جست‌وجو در نام درس یا پیش‌نیاز…" aria-label="جست‌وجو"><span class="search-shortcut">/</span></div>
+        <select id="filterStatus" class="select"><option value="">همه وضعیت‌ها</option><option value="پاس شده">پاس شده</option><option value="پاس نشده">پاس نشده</option></select>
+        <select id="filterType" class="select"><option value="">همه نوع‌ها</option></select>
+        <select id="filterTerm" class="select"><option value="">همه ترم‌ها</option><option value="1">ترم ۱</option><option value="2">ترم ۲</option><option value="3">ترم ۳</option><option value="4">ترم ۴</option><option value="5">ترم ۵</option><option value="6">ترم ۶</option><option value="7">ترم ۷</option><option value="8">ترم ۸</option><option value="9">ترم ۹</option><option value="none">بدون ترم</option></select>
+        <select id="filterReady" class="select"><option value="">همه پیش‌نیازها</option><option value="ready">آماده</option><option value="blocked">پیش‌نیاز ناقص</option></select>
+        <button class="btn" id="clearFilters" type="button">پاک‌کردن</button>
+      </div>
+      <div class="chips" id="activeChips"></div>
+      <div class="table-wrap"><table><thead><tr><th data-sort="name">نام درس</th><th data-sort="status">وضعیت</th><th data-sort="type">نوع</th><th data-sort="units">واحد</th><th data-sort="selectedTerm">ترم انتخابی</th><th>پیش‌نیاز</th><th data-sort="grade">نمره</th><th>عملیات</th></tr></thead><tbody id="coursesBody"></tbody></table></div><div class="empty" id="coursesEmpty" hidden>درسی با این فیلترها پیدا نشد.</div>
+    </section>
+  </section>
+
+  <!-- ==================== برنامه ترم‌ها ==================== -->
+  <section class="view" id="view-planning">
+    <section class="panel"><div class="panel-head"><h2>برنامه‌ریزی قابل ویرایش ترم‌های آینده</h2><span class="mini-badge">۸ مورد از داشبورد</span></div><p class="muted">ترم هدف در این جدول از ستون K شیت Dashboard منتقل شده است.</p><div class="table-wrap"><table><thead><tr><th>درس</th><th>نوع</th><th>واحد</th><th>ترم هدف</th><th>وضعیت برنامه</th><th>پیش‌نیاز</th><th></th></tr></thead><tbody id="planBody"></tbody></table></div><div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="addPlan" type="button">＋ افزودن برنامه</button><button class="btn" id="resetPlan" type="button">بازگردانی برنامه</button></div></section>
+  </section>
+
+  <!-- ==================== بار ترم‌ها ==================== -->
+  <section class="view" id="view-terms">
+    <div class="grid-two">
+      <section class="panel"><div class="panel-head"><h2>خلاصه ترم‌ها (شیت Other)</h2><span class="mini-badge">اعداد اصلی</span></div><div class="table-wrap"><table><thead><tr><th>ترم</th><th>واحد</th><th>تعداد درس</th><th>پیشنهادی</th><th>انتخابی</th></tr></thead><tbody id="otherTermsBody"></tbody></table></div></section>
+      <section class="panel"><div class="panel-head"><h2>بار ترم‌ها (شیت Dashboard)</h2><span class="mini-badge">اعداد اصلی</span></div><div class="table-wrap"><table><thead><tr><th>ترم</th><th>واحد</th><th>تعداد درس</th></tr></thead><tbody id="dashboardTermsBody"></tbody></table></div></section>
+    </div>
+    <section class="panel" style="margin-top:15px"><div class="panel-head"><h2>فهرست درس‌ها بر حسب ترم انتخابی</h2><span class="mini-badge">از داده جزئی</span></div><div class="table-wrap"><table><thead><tr><th>ترم</th><th>تعداد درس</th><th>واحد</th><th>پاس‌شده</th><th>باقی‌مانده</th><th>نمودار</th></tr></thead><tbody id="computedTermsBody"></tbody></table></div></section>
+  </section>
+
+  <!-- ==================== آمار تحلیلی ==================== -->
+  <section class="view" id="view-stats">
+    <div class="grid-two">
+      <section class="panel"><div class="panel-head"><h2>رتبه‌بندی ترم‌ها بر اساس بار</h2></div><canvas id="termLoadChart" style="width:100%;height:280px"></canvas></section>
+      <section class="panel"><div class="panel-head"><h2>وضعیت پیش‌نیازها</h2></div><div id="prereqStats"></div></section>
+    </div>
+    <div class="grid-two" style="margin-top:15px">
+      <section class="panel"><div class="panel-head"><h2>توزیع واحدها بر اساس نوع</h2></div><canvas id="unitDistChart" style="width:100%;height:280px"></canvas></section>
+      <section class="panel"><div class="panel-head"><h2>شاخص‌های کلیدی</h2></div><ul class="stats-list" id="keyStats"></ul></section>
+    </div>
+  </section>
+
+  <!-- ==================== دستاوردها ==================== -->
+  <section class="view" id="view-achievements">
+    <section class="panel"><div class="panel-head"><h2>دستاوردها و نقاط عطف</h2><span class="mini-badge" id="achCount">۰ از ۸</span></div><p class="muted">با پیشرفت در مسیر فارغ‌التحصیلی، نشان‌ها باز می‌شوند.</p><div class="achievements" id="achGrid" style="margin-top:14px"></div></section>
+  </section>
+
+  <!-- ==================== داده منبع ==================== -->
+  <section class="view" id="view-source">
+    <section class="panel"><div class="panel-head"><h2>بررسی داده‌های منبع</h2><span class="mini-badge">حفظ‌شده از اکسل</span></div><div class="alert-inline"><strong>مغایرت:</strong> شیت Dashboard مقادیر خلاصه‌ای دارد که با شیت Data's تطابق ندارند.</div>
+      <h3>خلاصه اصلی</h3><div class="source-summary" id="sourceHeadline"></div>
+      <h3 style="margin-top:18px">جدول پیشرفت داشبورد اصلی</h3><div class="table-wrap"><table><thead><tr><th>شاخص</th><th>تعداد درس</th><th>واحد</th><th>درصد</th></tr></thead><tbody id="sourceProgressBody"></tbody></table></div>
+      <h3 style="margin-top:18px">دروس باقی‌مانده بر اساس نوع</h3><div class="table-wrap"><table><thead><tr><th>نوع</th><th>تعداد درس</th><th>واحد</th><th>سهم</th><th>اولویت</th></tr></thead><tbody id="sourceTypeBody"></tbody></table></div>
+      <h3 style="margin-top:18px">توضیح انتقال</h3><ul class="note-list"><li><span class="bullet">•</span><span id="sourceTransferNote"></span></li></ul>
+    </section>
+  </section>
+
+</main>
+
+<footer class="footer">همراه تحصیلی · نسخه آفلاین · اطلاعات در مرورگر خودت ذخیره می‌شود</footer>
+</div>
+
+<!-- ==================== مودال درس ==================== -->
+<div class="modal-bg" id="courseModal" role="dialog" aria-modal="true"><form class="modal" id="courseForm"><div class="panel-head"><h2 id="courseModalTitle">افزودن درس</h2><button type="button" class="btn sm" id="closeCourseModal">✕</button></div><input type="hidden" id="courseId"><div class="form-grid">
+<div class="field"><label for="courseName">نام درس <span class="req">*</span></label><input id="courseName" required maxlength="180"></div><div class="field"><label for="courseStatus">وضعیت</label><select id="courseStatus"><option>پاس شده</option><option>پاس نشده</option></select></div>
+<div class="field"><label for="courseType">نوع درس</label><select id="courseType"></select></div><div class="field"><label for="courseUnits">تعداد واحد</label><input id="courseUnits" type="number" min="0" max="10" step="1" value="3"></div>
+<div class="field"><label for="courseSuggested">ترم پیشنهادی</label><select id="courseSuggested"></select></div><div class="field"><label for="courseSelected">ترم انتخابی</label><select id="courseSelected"></select></div>
+<div class="field"><label for="courseGrade">نمره (اختیاری)</label><input id="courseGrade" type="number" min="0" max="20" step="0.25" placeholder="مثلاً 18.5"></div><div class="field"><label for="courseNotes2">یادداشت</label><input id="courseNotes2" maxlength="250"></div>
+<div class="field" style="grid-column:1/-1"><label for="coursePrereq">پیش‌نیاز / هم‌نیاز</label><input id="coursePrereq" maxlength="250"></div>
+</div><div class="modal-actions"><button type="button" class="btn danger" id="deleteCourse" hidden>حذف</button><div style="display:flex;gap:8px;margin-inline-start:auto"><button type="button" class="btn" id="cancelCourse">انصراف</button><button type="submit" class="btn primary">ذخیره</button></div></div></form></div>
+
+<!-- ==================== مودال برنامه ==================== -->
+<div class="modal-bg" id="planModal" role="dialog" aria-modal="true"><form class="modal" id="planForm"><div class="panel-head"><h2 id="planModalTitle">افزودن برنامه</h2><button type="button" class="btn sm" id="closePlanModal">✕</button></div><input type="hidden" id="planId"><div class="form-grid"><div class="field" style="grid-column:1/-1"><label for="planName">نام درس <span class="req">*</span></label><input id="planName" required list="courseNames"></div><datalist id="courseNames"></datalist><div class="field"><label for="planType">نوع</label><select id="planType"></select></div><div class="field"><label for="planUnits">واحد</label><input id="planUnits" type="number" min="0" max="10" value="3"></div><div class="field"><label for="planTarget">ترم هدف</label><select id="planTarget"></select></div><div class="field"><label for="planStatus">وضعیت</label><select id="planStatus"><option>باقی‌مانده</option><option>در حال برنامه‌ریزی</option><option>انتخاب شده</option><option>انجام شد</option></select></div></div><div class="modal-actions"><button type="button" class="btn danger" id="deletePlan" hidden>حذف</button><div style="display:flex;gap:8px;margin-inline-start:auto"><button type="button" class="btn" id="cancelPlan">انصراف</button><button type="submit" class="btn primary">ذخیره</button></div></div></form></div>
+
+<!-- ==================== مودال تأیید ==================== -->
+<div class="modal-bg" id="confirmModal" role="dialog" aria-modal="true"><div class="modal" style="max-width:420px;text-align:center;padding:28px 24px"><div style="font-size:44px;margin-bottom:14px;line-height:1" id="confirmIcon">⚠️</div><h3 style="font-size:16px;font-weight:700;margin:0 0 8px" id="confirmTitle">تأیید</h3><p style="color:var(--muted);font-size:13px;margin:0 0 22px;line-height:1.8" id="confirmText"></p><div style="display:flex;gap:10px;justify-content:center"><button type="button" class="btn" id="confirmCancel">انصراف</button><button type="button" class="btn primary" id="confirmOk">تأیید</button></div></div></div>
+
+<!-- ==================== Command Palette ==================== -->
+<div class="cmdk" id="cmdk" role="dialog" aria-modal="true"><div class="cmdk-inner"><input class="cmdk-input" id="cmdkInput" placeholder="جست‌وجوی درس، بخش یا فرمان…" autocomplete="off"><div class="cmdk-list" id="cmdkList"></div></div></div>
+
+<!-- ==================== Drawer ==================== -->
+<div class="drawer-bg" id="drawerBg" style="position:fixed;inset:0;z-index:70;background:#000a;backdrop-filter:blur(4px);display:none"></div>
+<aside class="drawer" id="drawer" style="position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--panel);border-inline-start:1px solid var(--line);box-shadow:var(--shadow-lg);z-index:71;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">
+  <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px"><h3 id="drawerTitle" style="margin:0;font-size:15px">جزئیات</h3><button class="btn sm" id="closeDrawer" type="button">✕</button></div>
+  <div style="padding:18px;overflow:auto;flex:1" id="drawerBody"></div>
+</aside>
+
+<!-- ==================== Toast ==================== -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="toast-icon" id="toastIcon">✓</span><span class="toast-msg" id="toastMsg"></span>
+  <button class="toast-action" id="toastAction" hidden></button>
+</div>
+
+<button class="scroll-top" id="scrollTop" type="button" aria-label="بازگشت به بالا">↑</button>
+
+<nav class="mobile-nav" aria-label="ناوبری موبایل">
+  <button class="active" data-view="dashboard"><span class="mn-icon">▦</span><span>نمای کلی</span></button>
+  <button data-view="planner"><span class="mn-icon">🧠</span><span>برنامه‌ریز</span></button>
+  <button data-view="courses"><span class="mn-icon">▤</span><span>درس‌ها</span></button>
+  <button data-view="stats"><span class="mn-icon">📊</span><span>آمار</span></button>
+  <button data-view="achievements"><span class="mn-icon">🏆</span><span>دستاورد</span></button>
+</nav>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/state.js"></script>
+<script src="js/prereq.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/render.js"></script>
+<script src="js/gpa.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/planner.js"></script>
+<script src="js/modals.js"></script>
+<script src="js/export.js"></script>
+<script src="js/cmdk.js"></script>
+<script src="js/share.js"></script>
+<script src="js/events.js"></script>
+<script src="js/main.js"></script>
+</body></html>
